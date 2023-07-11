@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "Chainstack DLP",
+  "description": "This extension redacts sensitive data in the user input for ChatGPT allowing a form of Data Leak Protection.",
+  "version": "1.0",
+  "permissions": ["storage", "activeTab", "http://*/*", "https://*/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://chat.openai.com/*"],
+      "js": ["content/content.js"]
+    }
+  ],
+  "background": {
+    "scripts": ["dist/bundle.js", "background/background.js"],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Data Leak Protection"
+  },
+  "web_accessible_resources": ["dist/bundle.js"]
+}

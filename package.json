@@ -2,5 +2,32 @@
   "dependencies": {
     "compromise": "^14.9.0",
     "gpt-3-encoder": "^1.1.4"
-  }
+  },
+  "name": "chainstack-dlp",
+  "description": "Chrome extention that redacts potentially sensitive information before quering ChatGPT",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soos3d/chainstack-dlp.git"
+  },
+  "keywords": [
+    "dlp",
+    "chatgpt",
+    "data",
+    "leak",
+    "protection"
+  ],
+  "author": "DZ",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/soos3d/chainstack-dlp/issues"
+  },
+  "homepage": "https://github.com/soos3d/chainstack-dlp#readme"
 }
