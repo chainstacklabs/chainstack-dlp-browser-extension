@@ -1,5 +1,6 @@
 window.addEventListener(
   "message",
+  console.log("message"),
   function (event) {
     // We only accept messages from ourselves
     if (event.source != window) return;
@@ -23,7 +24,7 @@ let bundlePromise = new Promise((resolve) => {
       console.log("Script injected:", script);
 
       resolve(); // Resolve the Promise
-      console.log(window.data_redactor);
+      console.log("this", Window.data_redactor);
     });
 });
 
@@ -33,6 +34,7 @@ bundlePromise.then(() => {
   chrome.storage.sync.get(["enabled", "redactSettings"], function (items) {
     console.log("Settings loaded:", items); // Log the loaded settings
     if (items.enabled) {
+      console.log("window:", window); // Check if window.data_redactor is defined
       console.log("window.data_redactor:", window.data_redactor); // Check if window.data_redactor is defined
       let dataRedactor = window.data_redactor; // Try to capture window.data_redactor in a closure
 
