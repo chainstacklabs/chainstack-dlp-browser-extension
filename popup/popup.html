@@ -1,19 +1,65 @@
-<!-- popup.html -->
 <!DOCTYPE html>
 <html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        color: #3c4043;
+        margin: 0;
+        padding: 0;
+        min-width: 300px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        padding: 10px 20px;
+        gap: 15px;
+      }
+      h1 {
+        color: #1a73e8;
+      }
+      h2 {
+        color: #202124;
+        padding: 10px 20px;
+        margin-bottom: 0;
+      }
+      .settings {
+        padding: 10px 20px;
+        border: 2px solid #1a73e8;
+        border-radius: 5px;
+        margin: 5px 20px;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      label input {
+        margin-right: 5px;
+      }
+    </style>
+  </head>
   <body>
-    <h1>Chainstack DLP</h1>
-    <input type="checkbox" id="enabledCheckbox" /> Enable Input Box<br />
+    <div class="header">
+      <img src="https://cdn.techinasia.com/data/images/e1d0263943cfe709c971633352fd8fee.png" alt="Chainstack logo" width="40" height="40">
+      <h1>Chainstack DLP</h1>
+    </div>
+    <div class="settings">
+      <label><input type="checkbox" id="enabledCheckbox" /> Enable</label>
+    </div>
     <h2>Redact Settings</h2>
-    <input type="checkbox" id="creditCard" /> Credit Card Numbers<br />
-    <input type="checkbox" id="jwt" /> JSON Web Tokens<br />
-    <input type="checkbox" id="rpcEndpoint" /> RPC Endpoints<br />
-    <input type="checkbox" id="ethPrivateKey" /> Ethereum Private Keys<br />
-    <input type="checkbox" id="ethAddress" /> Ethereum Addresses<br />
-    <input type="checkbox" id="apiKey" /> API Keys<br />
-    <input type="checkbox" id="phoneNumber" /> Phone Numbers<br />
-    <input type="checkbox" id="personNameCheckbox" /> Person Names<br />
-    <input type="checkbox" id="locationCheckbox" /> Locations<br />
+    <div class="settings">
+      <label><input type="checkbox" id="creditCard" /> Credit Card Numbers</label>
+      <label><input type="checkbox" id="jwt" /> JSON Web Tokens</label>
+      <label><input type="checkbox" id="rpcEndpoint" /> RPC Endpoints</label>
+      <label><input type="checkbox" id="ethPrivateKey" /> Ethereum Private Keys</label>
+      <label><input type="checkbox" id="ethAddress" /> Ethereum Addresses</label>
+      <label><input type="checkbox" id="apiKey" /> API Keys</label>
+      <label><input type="checkbox" id="phoneNumber" /> Phone Numbers</label>
+      <label><input type="checkbox" id="personNameCheckbox" /> Person Names</label>
+      <label><input type="checkbox" id="locationCheckbox" /> Locations</label>
+    </div>
     <script src="popup.js"></script>
   </body>
 </html>
