@@ -1,79 +1,112 @@
 // content.js
 
-let hasUpdated = false; // <-- Add a flag here
-
 function updateInputBox() {
-  // Initialize dataRedactor with the current settings
   chrome.storage.sync.get("redactSettings", function (items) {
     let dataRedactor = new window.data_redactor(items.redactSettings);
-    console.log("Settings:", items.redactSettings);
-    console.log("Test text:", dataRedactor.redact("My name is David"));
 
-    let oldInputBox = document.querySelector("#prompt-textarea");
-    if (!oldInputBox) {
-      console.error("Old input box not found");
+    let inputBox = document.querySelector("#prompt-textarea");
+    if (!inputBox) {
+      console.error("Input box not found");
       return;
     }
 
-    // Insert the new input box if it doesn't exist yet
-    let newInputBox = document.querySelector("#newInputBox");
-    let tokenCountElement = document.querySelector("#tokenCount"); // <-- Get the token count element
-    if (!newInputBox) {
-      newInputBox = document.createElement("textarea");
-      newInputBox.id = "newInputBox";
-      newInputBox.style.color = "black";
+    let previewBox = document.querySelector("#previewBox");
+    if (!previewBox) {
+      previewBox = document.createElement("div");
+      previewBox.id = "previewBox";
+      previewBox.style.border = "1px solid #ccc";
+      previewBox.style.color = "white";
+      previewBox.style.padding = "5px";
+      previewBox.style.marginBottom = "10px";
+      previewBox.style.borderRadius = "5px";
+      previewBox.style.width = "calc(100% - 10px)";
+      previewBox.style.display = "none";
 
-      // Create a token count element
-      tokenCountElement = document.createElement("div");
-      tokenCountElement.id = "tokenCount";
-      tokenCountElement.style.color = "white";
-
-      // Insert the new elements
-      oldInputBox.parentNode.insertBefore(newInputBox, oldInputBox);
-      oldInputBox.parentNode.insertBefore(tokenCountElement, newInputBox); // <-- Insert it before the new input box
+      inputBox.parentNode.insertBefore(previewBox, inputBox);
     }
 
-    // When the new input box loses focus, redact the text and put it in the old input box
-    newInputBox.onblur = function () {
-      let text = newInputBox.value;
+    let toggleButton = document.querySelector("#toggleButton");
+    if (!toggleButton) {
+      toggleButton = document.createElement("button");
+      toggleButton.id = "toggleButton";
+      toggleButton.textContent = "⇕";
+      toggleButton.style.position = "absolute";
+      toggleButton.style.left = "10px";
+      toggleButton.style.top = "-30px";
+      toggleButton.style.backgroundColor = "#40414f";
+      toggleButton.style.color = "white";
+      toggleButton.style.width = "40px";
+      toggleButton.style.height = "20px";
+      toggleButton.style.border = "none";
+      toggleButton.style.borderRadius = "10px";
+      toggleButton.style.fontSize = "12px";
+      toggleButton.style.lineHeight = "20px";
+      toggleButton.style.display = "flex";
+      toggleButton.style.justifyContent = "center";
+      toggleButton.style.alignItems = "center";
+
+      toggleButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        previewBox.style.display = previewBox.style.display === "none" ? "block" : "none";
+      });
+
+      inputBox.parentNode.insertBefore(toggleButton, previewBox);
+    }
+
+    let tokenCountElement = document.querySelector("#tokenCount");
+    if (!tokenCountElement) {
+      tokenCountElement = document.createElement("div");
+      tokenCountElement.id = "tokenCount";
+      tokenCountElement.style.color = "#808080"; 
+      tokenCountElement.style.fontSize = "12px";
+      tokenCountElement.style.marginTop = "10px";
+      tokenCountElement.textContent = "Token count: 0";
+
+      inputBox.parentNode.insertBefore(tokenCountElement, inputBox.nextSibling);
+    }
+
+    inputBox.addEventListener('input', function() {
+      let text = inputBox.value;
       let redactedText = dataRedactor.redact(text);
       let token_count = dataRedactor.countTokens(redactedText);
-      console.log("Redacted text:", redactedText);
-      console.log("Tokens count:", token_count);
 
-      // Set the value and dispatch an input event to notify any listeners that the value has changed
-      oldInputBox.value = redactedText;
-      oldInputBox.dispatchEvent(new Event("input", { bubbles: true }));
+      previewBox.textContent = redactedText;
 
-      // Update the token count element
       tokenCountElement.textContent = "Token count: " + token_count;
+    });
 
-      // Clear the new input box
-      newInputBox.value = "";
-    };
+    inputBox.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        let text = inputBox.value;
+        let redactedText = dataRedactor.redact(text);
+        let token_count = dataRedactor.countTokens(redactedText);
+
+        inputBox.value = redactedText;
+
+        previewBox.textContent = "";
+      }
+    });
   });
 }
 
-// Create a MutationObserver to watch for changes in the DOM
 let observer = new MutationObserver(function (mutations) {
   mutations.forEach(function (mutation) {
-    // If the addedNodes property has one or more nodes
-    if (!hasUpdated && mutation.addedNodes.length) {
-      // <-- Check the flag here
-      let oldInputBox = document.querySelector("#prompt-textarea");
-      if (oldInputBox) {
-        // The input box has been added, update it
-        updateInputBox();
-        // Stop observing changes to the DOM
+    if (mutation.addedNodes.length) {
+      let inputBox = document.querySelector("#prompt-textarea");
+      if (inputBox) {
         observer.disconnect();
-        hasUpdated = true; // <-- Set the flag here
+        updateInputBox();
+        startObserver();  // Restart the observer
       }
     }
   });
 });
 
-// Start observing changes to the DOM
-observer.observe(document.body, {
-  childList: true,
-  subtree: true,
-});
+function startObserver() {
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+}
+
+startObserver(); // Start observing initially
