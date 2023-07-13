@@ -1,10 +1,13 @@
 // content.js
 
+let inputBox = null;
+let lastInput = "";
+
 function updateInputBox() {
   chrome.storage.sync.get("redactSettings", function (items) {
     let dataRedactor = new window.data_redactor(items.redactSettings);
 
-    let inputBox = document.querySelector("#prompt-textarea");
+    inputBox = document.querySelector("#prompt-textarea");
     if (!inputBox) {
       console.error("Input box not found");
       return;
@@ -21,7 +24,6 @@ function updateInputBox() {
       previewBox.style.borderRadius = "5px";
       previewBox.style.width = "calc(100% - 10px)";
       previewBox.style.display = "none";
-
       inputBox.parentNode.insertBefore(previewBox, inputBox);
     }
 
@@ -45,9 +47,10 @@ function updateInputBox() {
       toggleButton.style.justifyContent = "center";
       toggleButton.style.alignItems = "center";
 
-      toggleButton.addEventListener('click', function(e) {
+      toggleButton.addEventListener("click", function (e) {
         e.preventDefault();
-        previewBox.style.display = previewBox.style.display === "none" ? "block" : "none";
+        previewBox.style.display =
+          previewBox.style.display === "none" ? "block" : "none";
       });
 
       inputBox.parentNode.insertBefore(toggleButton, previewBox);
@@ -57,33 +60,35 @@ function updateInputBox() {
     if (!tokenCountElement) {
       tokenCountElement = document.createElement("div");
       tokenCountElement.id = "tokenCount";
-      tokenCountElement.style.color = "#808080"; 
+      tokenCountElement.style.color = "#808080";
       tokenCountElement.style.fontSize = "12px";
       tokenCountElement.style.marginTop = "10px";
       tokenCountElement.textContent = "Token count: 0";
-
       inputBox.parentNode.insertBefore(tokenCountElement, inputBox.nextSibling);
     }
 
-    inputBox.addEventListener('input', function() {
+    inputBox.addEventListener("input", function () {
       let text = inputBox.value;
-      let redactedText = dataRedactor.redact(text);
-      let token_count = dataRedactor.countTokens(redactedText);
+      if (text !== lastInput) {
+        let redactedText = dataRedactor.redact(text);
+        let token_count = dataRedactor.countTokens(redactedText);
 
-      previewBox.textContent = redactedText;
+        previewBox.textContent = redactedText;
+        tokenCountElement.textContent = "Token count: " + token_count;
 
-      tokenCountElement.textContent = "Token count: " + token_count;
+        lastInput = text;
+      }
     });
 
-    inputBox.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
+    inputBox.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
         let text = inputBox.value;
         let redactedText = dataRedactor.redact(text);
         let token_count = dataRedactor.countTokens(redactedText);
 
         inputBox.value = redactedText;
-
         previewBox.textContent = "";
+        lastInput = "";
       }
     });
   });
@@ -91,12 +96,12 @@ function updateInputBox() {
 
 let observer = new MutationObserver(function (mutations) {
   mutations.forEach(function (mutation) {
-    if (mutation.addedNodes.length) {
-      let inputBox = document.querySelector("#prompt-textarea");
+    if (mutation.addedNodes.length && !inputBox) {
+      inputBox = document.querySelector("#prompt-textarea");
       if (inputBox) {
         observer.disconnect();
         updateInputBox();
-        startObserver();  // Restart the observer
+        startObserver(); // Restart the observer
       }
     }
   });
