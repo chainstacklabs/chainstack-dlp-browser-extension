@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "compromise": "^14.9.0",
-    "gpt-3-encoder": "^1.1.4"
+    "gpt-3-encoder": "^1.1.4",
+    "terser": "^5.19.0"
   },
   "name": "chainstack-dlp",
   "description": "Chrome extention that redacts potentially sensitive information before quering ChatGPT",
