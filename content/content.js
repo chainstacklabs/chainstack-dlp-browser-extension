@@ -12,8 +12,18 @@ if (!window.hasRun) {
 
   function updateInputBox() {
     chrome.storage.sync.get("redactSettings", function (items) {
-      let dataRedactor = new window.data_redactor(items.redactSettings);
-
+      let alwaysChecked = [
+        "creditCard",
+        "jwt",
+        "ethPrivateKey",
+        "apiKey",
+        "phoneNumber",
+      ];
+      let dataRedactor = new window.data_redactor(
+        items.redactSettings,
+        alwaysChecked
+      );
+      console.log("Settings: ", items.redactSettings);
       inputBox = document.querySelector("#prompt-textarea");
       if (!inputBox) {
         console.error("Input box not found");

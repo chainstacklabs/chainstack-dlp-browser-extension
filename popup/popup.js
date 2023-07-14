@@ -1,68 +1,114 @@
-// popup.js
 document.addEventListener("DOMContentLoaded", function () {
+  // List of checkbox IDs
+  let checkboxes = [
+    "enabledCheckbox",
+    "creditCard",
+    "jwt",
+    "rpcEndpoint",
+    "ethPrivateKey",
+    "ethAddress",
+    "apiKey",
+    "phoneNumber",
+    "names",
+    "locations",
+  ];
+
+  // Checkboxes that are always checked
+  let alwaysChecked = [
+    "creditCard",
+    "jwt",
+    "ethPrivateKey",
+    "apiKey",
+    "phoneNumber",
+  ];
+
+  // Initialize redactSettings if it does not exist
+  chrome.storage.sync.get("redactSettings", function (items) {
+    if (!items.redactSettings) {
+      let initialRedactSettings = {};
+      for (let checkboxID of checkboxes) {
+        if (checkboxID !== "enabledCheckbox") {
+          initialRedactSettings[checkboxID] =
+            alwaysChecked.includes(checkboxID);
+        }
+      }
+      chrome.storage.sync.set({ redactSettings: initialRedactSettings });
+    }
+  });
+
   // Load the settings
   chrome.storage.sync.get(["enabled", "redactSettings"], function (items) {
     // Set the state of the checkboxes based on the settings
-    document.querySelector("#enabledCheckbox").checked = items.enabled;
-    document.querySelector("#creditCard").checked =
-      items.redactSettings.creditCard;
-    // Do this for each type of data
-    document.querySelector("#jwt").checked = items.redactSettings.jwt;
-    document.querySelector("#rpcEndpoint").checked =
-      items.redactSettings.rpcEndpoint;
-    document.querySelector("#ethPrivateKey").checked =
-      items.redactSettings.ethPrivateKey;
-    document.querySelector("#ethAddress").checked =
-      items.redactSettings.ethAddress;
-    document.querySelector("#apiKey").checked = items.redactSettings.apiKey;
-    document.querySelector("#phoneNumber").checked =
-      items.redactSettings.phoneNumber;
-    document.querySelector("#personNameCheckbox").checked =
-      items.redactSettings.names;
-    document.querySelector("#locationCheckbox").checked =
-      items.redactSettings.locations;
+    for (let checkboxID of checkboxes) {
+      if (checkboxID === "enabledCheckbox") {
+        document.querySelector(`#${checkboxID}`).checked = items.enabled;
+      } else {
+        document.querySelector(`#${checkboxID}`).checked =
+          items.redactSettings[checkboxID];
+      }
+    }
+
+    // Ensure alwaysChecked checkboxes are checked and disabled
+    alwaysChecked.forEach(function (checkboxID) {
+      let checkbox = document.querySelector(`#${checkboxID}`);
+      checkbox.checked = true;
+      checkbox.disabled = true;
+    });
   });
 
   // When a checkbox is clicked, update the settings
-  document.querySelector("#enabledCheckbox").onclick = function () {
-    chrome.storage.sync.set({ enabled: this.checked });
-  };
-  document.querySelector("#creditCard").onclick = function () {
-    chrome.storage.sync.get(
-      "redactSettings",
-      function (items) {
-        items.redactSettings.creditCard = this.checked;
-        chrome.storage.sync.set({ redactSettings: items.redactSettings });
-      }.bind(this)
-    );
-  };
-  // Do this for each type of data
-  document.querySelector("#jwt").onclick = function () {
-    chrome.storage.sync.get(
-      "redactSettings",
-      function (items) {
-        items.redactSettings.jwt = this.checked;
-        chrome.storage.sync.set({ redactSettings: items.redactSettings });
-      }.bind(this)
-    );
-  };
-  // ... repeat for all other checkboxes ...
-  document.querySelector("#personNameCheckbox").onclick = function () {
-    chrome.storage.sync.get(
-      "redactSettings",
-      function (items) {
-        items.redactSettings.names = this.checked;
-        chrome.storage.sync.set({ redactSettings: items.redactSettings });
-      }.bind(this)
-    );
-  };
-  document.querySelector("#locationCheckbox").onclick = function () {
-    chrome.storage.sync.get(
-      "redactSettings",
-      function (items) {
-        items.redactSettings.locations = this.checked;
-        chrome.storage.sync.set({ redactSettings: items.redactSettings });
-      }.bind(this)
-    );
+  checkboxes.forEach(function (checkboxID) {
+    document.querySelector(`#${checkboxID}`).onclick = function () {
+      if (checkboxID === "enabledCheckbox") {
+        chrome.storage.sync.set({ enabled: this.checked });
+      } else if (!alwaysChecked.includes(checkboxID)) {
+        chrome.storage.sync.get(
+          "redactSettings",
+          function (items) {
+            items.redactSettings[checkboxID] = this.checked;
+            chrome.storage.sync.set({ redactSettings: items.redactSettings });
+          }.bind(this)
+        );
+      }
+    };
+  });
+
+  // When the Select All button is clicked, check or uncheck all checkboxes
+  document.querySelector("#selectAll").onclick = function () {
+    let allChecked = true;
+    for (let checkboxID of checkboxes) {
+      if (
+        checkboxID !== "enabledCheckbox" &&
+        !alwaysChecked.includes(checkboxID)
+      ) {
+        if (!document.querySelector(`#${checkboxID}`).checked) {
+          allChecked = false;
+          break;
+        }
+      }
+    }
+
+    for (let checkboxID of checkboxes) {
+      if (
+        checkboxID !== "enabledCheckbox" &&
+        !alwaysChecked.includes(checkboxID)
+      ) {
+        document.querySelector(`#${checkboxID}`).checked = !allChecked;
+      }
+    }
+
+    let newSettings = {};
+    for (let checkboxID of checkboxes) {
+      if (
+        checkboxID !== "enabledCheckbox" &&
+        !alwaysChecked.includes(checkboxID)
+      ) {
+        newSettings[checkboxID] = document.querySelector(
+          `#${checkboxID}`
+        ).checked;
+      }
+    }
+
+    chrome.storage.sync.set({ redactSettings: newSettings });
   };
 });
