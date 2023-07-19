@@ -11,6 +11,25 @@ if (!window.hasRun) {
   let lastInput = "";
   let debounceTimeout = null;
   const DEBOUNCE_DELAY = 70; // Adjust this value as needed
+  const alwaysChecked = [
+    "creditCard",
+    "jwt",
+    "ethPrivateKey",
+    "apiKey",
+    "phoneNumber",
+  ]; // Add this line
+
+  function redactAndCount(text) {
+    // Add this function
+    const dataRedactor = new window.data_redactor(
+      redactSettings,
+      alwaysChecked
+    );
+    const redactedText = dataRedactor.redact(text);
+    const tokenCount = dataRedactor.countTokens(redactedText);
+
+    return { redactedText, tokenCount };
+  }
 
   function cleanUp() {
     if (previewBox) previewBox.remove();
@@ -56,12 +75,14 @@ if (!window.hasRun) {
       previewBox.style.borderRadius = "5px";
       previewBox.style.width = "calc(100% - 10px)";
       previewBox.style.display = "none";
+      previewBox.style.height = "150px"; // Set this to the desired height
+      previewBox.style.overflow = "auto"; // Make it scrollable if the content exceeds the height
       inputBox.parentNode.insertBefore(previewBox, inputBox);
 
       // Create Toggle Button
       toggleButton = document.createElement("button");
       toggleButton.id = "toggleButton";
-      toggleButton.textContent = "⇕";
+      toggleButton.textContent = "↕";
       toggleButton.style.position = "absolute";
       toggleButton.style.left = "10px";
       toggleButton.style.top = "-30px";
@@ -85,6 +106,34 @@ if (!window.hasRun) {
 
       inputBox.parentNode.insertBefore(toggleButton, previewBox);
 
+      // Create Clear Button
+      let clearButton = document.createElement("button");
+      clearButton.id = "clearButton";
+      clearButton.textContent = "Clear";
+      clearButton.style.position = "absolute";
+      clearButton.style.left = "60px";
+      clearButton.style.top = "-30px";
+      clearButton.style.backgroundColor = "#40414f";
+      clearButton.style.color = "white";
+      clearButton.style.width = "60px";
+      clearButton.style.height = "20px";
+      clearButton.style.border = "none";
+      clearButton.style.borderRadius = "10px";
+      clearButton.style.fontSize = "12px";
+      clearButton.style.lineHeight = "20px";
+      clearButton.style.display = "flex";
+      clearButton.style.justifyContent = "center";
+      clearButton.style.alignItems = "center";
+
+      clearButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        inputBox.value = "";
+        previewBox.textContent = "";
+        tokenCountElement.textContent = "Token count: 0";
+      });
+
+      inputBox.parentNode.insertBefore(clearButton, toggleButton.nextSibling);
+
       // Create Token Counter
       tokenCountElement = document.createElement("div");
       tokenCountElement.id = "tokenCount";
@@ -92,33 +141,18 @@ if (!window.hasRun) {
       tokenCountElement.style.fontSize = "12px";
       tokenCountElement.style.marginTop = "10px";
       tokenCountElement.textContent = "Token count: 0";
-      inputBox.parentNode.insertBefore(
-        tokenCountElement,
-        inputBox.nextSibling
-      );
+      inputBox.parentNode.insertBefore(tokenCountElement, inputBox.nextSibling);
 
       // Input Event Listener
       inputBox.addEventListener("input", function () {
         clearTimeout(debounceTimeout);
         debounceTimeout = setTimeout(function () {
-          let alwaysChecked = [
-            "creditCard",
-            "jwt",
-            "ethPrivateKey",
-            "apiKey",
-            "phoneNumber",
-          ];
-          let dataRedactor = new window.data_redactor(
-            redactSettings,
-            alwaysChecked
-          );
-          let text = inputBox.value;
+          const text = inputBox.value;
           if (text !== lastInput) {
-            let redactedText = dataRedactor.redact(text);
-            let token_count = dataRedactor.countTokens(redactedText);
+            const { redactedText, tokenCount } = redactAndCount(text); // Use the new function here
 
             previewBox.textContent = redactedText;
-            tokenCountElement.textContent = "Token count: " + token_count;
+            tokenCountElement.textContent = "Token count: " + tokenCount;
 
             lastInput = text;
           }
@@ -128,20 +162,7 @@ if (!window.hasRun) {
       // Keydown Event Listener
       inputBox.addEventListener("keydown", function (e) {
         if (e.key === "Enter" && !e.shiftKey) {
-          let alwaysChecked = [
-            "creditCard",
-            "jwt",
-            "ethPrivateKey",
-            "apiKey",
-            "phoneNumber",
-          ];
-          let dataRedactor = new window.data_redactor(
-            redactSettings,
-            alwaysChecked
-          );
-          let text = inputBox.value;
-          let redactedText = dataRedactor.redact(text);
-          let token_count = dataRedactor.countTokens(redactedText);
+          const { redactedText } = redactAndCount(inputBox.value); // And here
 
           inputBox.value = redactedText;
           previewBox.textContent = "";
@@ -153,7 +174,8 @@ if (!window.hasRun) {
       // Send Button Click Event Listener
       document.body.addEventListener("click", function (e) {
         let sendButton = document.querySelector(
-          'button svg path[d="M.5 1.163A1 1 0 0 1 1.97.28l12.868 6.837a1 1 0 0 1 0 1.766L1.969 15.72A1 1 0 0 1 .5 14.836V10.33a1 1 0 0 1 .816-.983L8.5 8 1.316 6.653A1 1 0 0 1 .5 5.67V1.163Z"]').parentNode.parentNode;
+          'button svg path[d="M.5 1.163A1 1 0 0 1 1.97.28l12.868 6.837a1 1 0 0 1 0 1.766L1.969 15.72A1 1 0 0 1 .5 14.836V10.33a1 1 0 0 1 .816-.983L8.5 8 1.316 6.653A1 1 0 0 1 .5 5.67V1.163Z"]'
+        ).parentNode.parentNode;
         if (!sendButton) {
           return;
         }
@@ -166,20 +188,7 @@ if (!window.hasRun) {
             e.preventDefault();
 
             if (enabled) {
-              let alwaysChecked = [
-                "creditCard",
-                "jwt",
-                "ethPrivateKey",
-                "apiKey",
-                "phoneNumber",
-              ];
-              let dataRedactor = new window.data_redactor(
-                redactSettings,
-                alwaysChecked
-              );
-              let text = inputBox.value;
-              let redactedText = dataRedactor.redact(text);
-              let token_count = dataRedactor.countTokens(redactedText);
+              const { redactedText } = redactAndCount(inputBox.value); // And here
 
               inputBox.value = redactedText;
               previewBox.textContent = "";
@@ -218,20 +227,20 @@ if (!window.hasRun) {
     });
   });
 
-function startObserver() {
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-  });
-}
-
-startObserver(); // Start observing initially
-
-chrome.storage.onChanged.addListener(function(changes, namespace) {
-  for (let key in changes) {
-    if (key === "redactSettings" || key === "enabled") {
-      updateInputBox(); // re-initialize with new settings
-    }
+  function startObserver() {
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
   }
-});
+
+  startObserver(); // Start observing initially
+
+  chrome.storage.onChanged.addListener(function (changes, namespace) {
+    for (let key in changes) {
+      if (key === "redactSettings" || key === "enabled") {
+        updateInputBox(); // re-initialize with new settings
+      }
+    }
+  });
 }
