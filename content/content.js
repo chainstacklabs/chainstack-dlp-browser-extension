@@ -15,12 +15,10 @@ if (!window.hasRun) {
     "creditCard",
     "jwt",
     "ethPrivateKey",
-    "apiKey",
     "phoneNumber",
-  ]; // Add this line
+  ]; 
 
   function redactAndCount(text) {
-    // Add this function
     const dataRedactor = new window.data_redactor(
       redactSettings,
       alwaysChecked
@@ -34,29 +32,30 @@ if (!window.hasRun) {
   function cleanUp() {
     if (previewBox) previewBox.remove();
     if (toggleButton) toggleButton.remove();
+    if (clearButton) clearButton.remove(); 
     if (tokenCountElement) tokenCountElement.remove();
-
+  
     previewBox = null;
     toggleButton = null;
+    clearButton = null;
     tokenCountElement = null;
     inputBox = null;
   }
+  
+  let clearButton = null;
 
   function updateInputBox() {
     chrome.storage.sync.get(["enabled", "redactSettings"], function (items) {
       enabled = items.enabled;
       redactSettings = items.redactSettings;
 
-      // If enabled is unchecked, clean up and stop the functionality
       if (!enabled) {
         cleanUp();
         return;
       }
 
-      // Continue with the normal functionality if enabled is checked
       console.log("Settings: ", redactSettings);
 
-      // Clean up any previous UI
       cleanUp();
 
       inputBox = document.querySelector("#prompt-textarea");
@@ -75,8 +74,9 @@ if (!window.hasRun) {
       previewBox.style.borderRadius = "5px";
       previewBox.style.width = "calc(100% - 10px)";
       previewBox.style.display = "none";
-      previewBox.style.height = "150px"; // Set this to the desired height
-      previewBox.style.overflow = "auto"; // Make it scrollable if the content exceeds the height
+      previewBox.style.height = 'auto';
+      previewBox.style.maxHeight = "300px";
+      previewBox.style.overflow = "auto";
       inputBox.parentNode.insertBefore(previewBox, inputBox);
 
       // Create Toggle Button
@@ -107,7 +107,7 @@ if (!window.hasRun) {
       inputBox.parentNode.insertBefore(toggleButton, previewBox);
 
       // Create Clear Button
-      let clearButton = document.createElement("button");
+      clearButton = document.createElement("button");
       clearButton.id = "clearButton";
       clearButton.textContent = "Clear";
       clearButton.style.position = "absolute";
@@ -149,7 +149,7 @@ if (!window.hasRun) {
         debounceTimeout = setTimeout(function () {
           const text = inputBox.value;
           if (text !== lastInput) {
-            const { redactedText, tokenCount } = redactAndCount(text); // Use the new function here
+            const { redactedText, tokenCount } = redactAndCount(text); 
 
             previewBox.textContent = redactedText;
             tokenCountElement.textContent = "Token count: " + tokenCount;
@@ -162,51 +162,62 @@ if (!window.hasRun) {
       // Keydown Event Listener
       inputBox.addEventListener("keydown", function (e) {
         if (e.key === "Enter" && !e.shiftKey) {
-          const { redactedText } = redactAndCount(inputBox.value); // And here
+          const { redactedText } = redactAndCount(inputBox.value); 
 
           inputBox.value = redactedText;
           previewBox.textContent = "";
           lastInput = "";
-          tokenCountElement.textContent = "Token count: 0"; // Reset the token count
+          tokenCountElement.textContent = "Token count: 0";
         }
       });
 
-      // Send Button Click Event Listener
-      document.body.addEventListener("click", function (e) {
-        let sendButton = document.querySelector(
-          'button svg path[d="M.5 1.163A1 1 0 0 1 1.97.28l12.868 6.837a1 1 0 0 1 0 1.766L1.969 15.72A1 1 0 0 1 .5 14.836V10.33a1 1 0 0 1 .816-.983L8.5 8 1.316 6.653A1 1 0 0 1 .5 5.67V1.163Z"]'
-        ).parentNode.parentNode;
-        if (!sendButton) {
-          return;
-        }
+  // Returns the first element matching the XPath expression
+function getElementByXpath(path) {
+  return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+}
 
-        let targetElement = e.target;
-        do {
-          if (targetElement === sendButton) {
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            e.preventDefault();
+document.body.addEventListener("click", function (e) {
+  let sendButton = getElementByXpath('//button[contains(@class, "enabled:bg-brand-purple")]');
+  if (!sendButton) {
+    return;
+  }
 
-            if (enabled) {
-              const { redactedText } = redactAndCount(inputBox.value); // And here
+  let targetElement = e.target;
+  do {
+    if (targetElement === sendButton) {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      e.preventDefault();
 
-              inputBox.value = redactedText;
-              previewBox.textContent = "";
-              lastInput = "";
-              tokenCountElement.textContent = "Token count: 0"; // Reset the token count
-            }
+      if (enabled) {
+        const { redactedText } = redactAndCount(inputBox.value);
 
-            // Programmatically trigger a 'Enter' key press event
-            let enterKeyEvent = new KeyboardEvent("keydown", {
-              key: "Enter",
-              bubbles: true,
-            });
-            inputBox.dispatchEvent(enterKeyEvent);
-            return;
-          }
-          targetElement = targetElement.parentNode;
-        } while (targetElement);
-      });
+        // Clear the textbox
+        inputBox.value = '';
+        inputBox.dispatchEvent(new Event('input', { bubbles: true }));
+
+        // Insert the redacted text
+        inputBox.focus();
+        document.execCommand('insertText', false, redactedText);
+
+        // Reset other UI elements
+        previewBox.textContent = "";
+        lastInput = "";
+        tokenCountElement.textContent = "Token count: 0";
+
+        // Programmatically trigger a 'Enter' key press event
+        let enterKeyEvent = new KeyboardEvent("keydown", {
+          key: "Enter",
+          bubbles: true,
+        });
+        inputBox.dispatchEvent(enterKeyEvent);
+      }
+      return;
+    }
+    targetElement = targetElement.parentNode;
+  } while (targetElement);
+});
+
     });
   }
 
@@ -234,12 +245,12 @@ if (!window.hasRun) {
     });
   }
 
-  startObserver(); // Start observing initially
+  startObserver();
 
   chrome.storage.onChanged.addListener(function (changes, namespace) {
     for (let key in changes) {
       if (key === "redactSettings" || key === "enabled") {
-        updateInputBox(); // re-initialize with new settings
+        updateInputBox();
       }
     }
   });

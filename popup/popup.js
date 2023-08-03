@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function () {
     "enabledCheckbox",
     "creditCard",
     "jwt",
-    "rpcEndpoint",
     "ethPrivateKey",
     "ethAddress",
     "apiKey",
@@ -18,7 +17,6 @@ document.addEventListener("DOMContentLoaded", function () {
     "creditCard",
     "jwt",
     "ethPrivateKey",
-    "apiKey",
     "phoneNumber",
   ];
 
