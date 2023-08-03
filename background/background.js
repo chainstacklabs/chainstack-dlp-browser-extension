@@ -7,7 +7,6 @@ chrome.runtime.onInstalled.addListener(function () {
     redactSettings: {
       creditCard: true,
       jwt: true,
-      rpcEndpoint: true,
       ethPrivateKey: true,
       ethAddress: true,
       apiKey: true,
