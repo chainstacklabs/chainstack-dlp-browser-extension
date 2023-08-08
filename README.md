@@ -35,3 +35,5 @@ The Chainstack DLP tool employs regular expression patterns to detect potentiall
    - Click the Load unpacked button and select the extension directory (`dist` in this case).
 
 Now, your browser extension is installed and ready to use.
+
+> Note that you will need to re-run the bundle command every time you edit `index.js`.
