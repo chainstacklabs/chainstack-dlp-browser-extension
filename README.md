@@ -37,7 +37,7 @@ The Chainstack DLP tool employs regular expression patterns to detect potentiall
 
 ## Quickstart
 
-1. **Install Browserify**: Browserify is a tool that allows you to use `require()` style CommonJS modules in the browser. It bundles up all of your dependencies into one JavaScript file so that you can include it in your HTML file. Install it globally using npm with the following command:
+1. **Install Browserify**: [Browserify](https://browserify.org/) is a tool that allows you to use `require()` style CommonJS modules in the browser. It bundles up all of your dependencies into one JavaScript file so that you can include it in your HTML file. Install it globally using npm with the following command:
 
    ```
    npm install -g browserify
