@@ -69,6 +69,7 @@ A popup window is provided to manage the redaction tool. Users can enable or dis
 
 Any changes made within the popup window will update live. However, you must empty the ChatGPT input bar and re-enter the content to see these changes. A preview is available to check the content before submitting it to ChatGPT. If something appears malfunctioning, reloading the page should resolve the issue.
 
-<img width="677" alt="Preview image of the Chainstack DLP popup" src="https://github.com/soos3d/chainstack-dlp/assets/99700157/141da5b8-7b79-4937-99fe-ea455c8b3f13">
+<img width="677" alt="Preview image of the Chainstack DLP popup" src="https://github.com/chainstacklabs/chainstack-dlp-browser-extension/assets/99700157/6b96ffab-62f4-4525-9b01-4f18bdd0e129">
+
 
 > Chainstack DLP popup preview.
