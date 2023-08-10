@@ -30,10 +30,18 @@ The Chainstack DLP tool employs regular expression patterns to detect potentiall
 
 3. **Install the Extension from Developer Tools**: After bundling your JavaScript files, the next step is to install the extension in your browser. This process can vary depending on the browser you're using. For Chrome, you can do this by:
 
-   - Open the Extension Management page by navigating to `chrome://extensions`. Alternatively, open this page by clicking on the Extensions menu button and selecting Manage Extensions at the bottom of the menu.
+   - Open the Extension Management page by navigating to `chrome://extensions`. Alternatively, open this page by clicking on browser settings > Extensions > Manage extensions.
    - Enable Developer Mode by clicking the toggle switch next to Developer mode.
-   - Click the Load unpacked button and select the extension directory (`dist` in this case).
+   - Click the ` Load unpacked`` button and select the extension directory,  `chainstack-dlp` in this case.
 
 Now, your browser extension is installed and ready to use.
 
 > Note that you will need to re-run the bundle command every time you edit `index.js`.
+
+## Usage
+
+The Chainstack DLP introduces two buttons and a small preview window located above the ChatGPT input bar. The `↕` button serves two functions: expanding and minimizing the preview window. Meanwhile, the clear button deletes all content within the ChatGPT input bar.
+
+A popup window is provided to manage the redaction tool. Users can enable or disable the tool, as well as select or deselect specific types of data to redact. However, particularly sensitive data such as credit card patterns, JSON Web Tokens, Ethereum Private Keys, and phone numbers cannot be disabled.
+
+Any changes made within the popup window will update live. However, to see these changes, you must first empty the ChatGPT input bar and re-enter the content. A preview is available to check the content before submitting it to ChatGPT. If something appears to be malfunctioning, reloading the page should resolve the issue.
